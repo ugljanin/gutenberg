@@ -19,7 +19,7 @@ const CLIError = require( './cli-error' );
 const { info } = require( './log' );
 const prompts = require( './prompts' );
 
-const predefinedBlockTemplates = {
+const predefinedPluginTemplates = {
 	es5: {
 		defaultValues: {
 			slug: 'es5-example',
@@ -44,8 +44,13 @@ const predefinedBlockTemplates = {
 			supports: {
 				html: false,
 			},
+			editorScript: 'file:./index.js',
+			editorStyle: 'file:./index.css',
+			style: 'file:./style-index.css',
 		},
-		templatesPath: join( __dirname, 'templates', 'esnext' ),
+		templatesPath: join( __dirname, 'templates', 'esnext', 'plugin' ),
+		blockFolderName: 'src',
+		blockTemplatesPath: join( __dirname, 'templates', 'esnext', 'block' ),
 	},
 };
 
@@ -99,24 +104,30 @@ const externalTemplateExists = async ( templateName ) => {
 
 const configToTemplate = async ( {
 	assetsPath,
+	blockFolderName = '.',
+	blockTemplatesPath,
 	defaultValues = {},
 	templatesPath,
 } ) => {
-	if ( ! isObject( defaultValues ) || ! templatesPath ) {
+	if ( ! isObject( defaultValues ) || ! blockFolderName || ! templatesPath ) {
 		throw new CLIError( 'Template found but invalid definition provided.' );
 	}
 
 	return {
+		blockOutputFolder: blockFolderName,
+		blockOutputTemplates: blockTemplatesPath
+			? await getOutputTemplates( blockTemplatesPath )
+			: {},
 		defaultValues,
 		outputAssets: assetsPath ? await getOutputAssets( assetsPath ) : {},
 		outputTemplates: await getOutputTemplates( templatesPath ),
 	};
 };
 
-const getBlockTemplate = async ( templateName ) => {
-	if ( predefinedBlockTemplates[ templateName ] ) {
+const getPluginTemplate = async ( templateName ) => {
+	if ( predefinedPluginTemplates[ templateName ] ) {
 		return await configToTemplate(
-			predefinedBlockTemplates[ templateName ]
+			predefinedPluginTemplates[ templateName ]
 		);
 	}
 
@@ -137,8 +148,8 @@ const getBlockTemplate = async ( templateName ) => {
 
 	if ( ! ( await externalTemplateExists( templateName ) ) ) {
 		throw new CLIError(
-			`Invalid block template type name: "${ templateName }". Allowed values: ` +
-				Object.keys( predefinedBlockTemplates )
+			`Invalid plugin template type name: "${ templateName }". Allowed values: ` +
+				Object.keys( predefinedPluginTemplates )
 					.map( ( name ) => `"${ name }"` )
 					.join( ', ' ) +
 				', or an existing npm package name.'
@@ -168,7 +179,7 @@ const getBlockTemplate = async ( templateName ) => {
 			throw error;
 		} else {
 			throw new CLIError(
-				`Invalid block template downloaded. Error: ${ error.message }`
+				`Invalid plugin template downloaded. Error: ${ error.message }`
 			);
 		}
 	} finally {
@@ -178,7 +189,7 @@ const getBlockTemplate = async ( templateName ) => {
 	}
 };
 
-const getDefaultValues = ( blockTemplate ) => {
+const getDefaultValues = ( pluginTemplate ) => {
 	return {
 		$schema: 'https://schemas.wp.org/trunk/block.json',
 		apiVersion: 2,
@@ -194,12 +205,12 @@ const getDefaultValues = ( blockTemplate ) => {
 		editorScript: 'file:./build/index.js',
 		editorStyle: 'file:./build/index.css',
 		style: 'file:./build/style-index.css',
-		...blockTemplate.defaultValues,
+		...pluginTemplate.defaultValues,
 	};
 };
 
-const getPrompts = ( blockTemplate ) => {
-	const defaultValues = getDefaultValues( blockTemplate );
+const getPrompts = ( pluginTemplate ) => {
+	const defaultValues = getDefaultValues( pluginTemplate );
 	return Object.keys( prompts ).map( ( promptName ) => {
 		return {
 			...prompts[ promptName ],
@@ -209,7 +220,7 @@ const getPrompts = ( blockTemplate ) => {
 };
 
 module.exports = {
-	getBlockTemplate,
+	getPluginTemplate,
 	getDefaultValues,
 	getPrompts,
 };
