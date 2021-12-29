@@ -124,8 +124,14 @@ class RCTAztecView: Aztec.TextView {
         .mark: "mark"
     ]
 
-    override init(defaultFont: UIFont, defaultParagraphStyle: ParagraphStyle, defaultMissingImage: UIImage) {
+    /*override init(defaultFont: UIFont, defaultParagraphStyle: ParagraphStyle, defaultMissingImage: UIImage) {
         super.init(defaultFont: defaultFont, defaultParagraphStyle: defaultParagraphStyle, defaultMissingImage: defaultMissingImage)
+        commonInit()
+    }*/
+    
+    convenience init(defaultFont: UIFont, monospaceFont: UIFont, defaultParagraphStyle: ParagraphStyle, defaultMissingImage: UIImage) {
+        self.init(defaultFont: defaultFont, monospaceFont: monospaceFont, defaultParagraphStyle: defaultParagraphStyle, defaultMissingImage: defaultMissingImage)
+        self.monospaceFont = monospaceFont
         commonInit()
     }
 
