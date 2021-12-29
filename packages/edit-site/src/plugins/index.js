@@ -8,6 +8,7 @@ import { registerPlugin } from '@wordpress/plugins';
  */
 import ToolsMoreMenuGroup from '../components/header/tools-more-menu-group';
 import SiteExport from './site-export';
+import KeyboardShortcutsHelpMenuItem from './keyboard-shortcut-help-menu-item';
 import WelcomeGuideMenuItem from './welcome-guide-menu-item';
 
 registerPlugin( 'edit-site', {
@@ -16,6 +17,7 @@ registerPlugin( 'edit-site', {
 			<>
 				<ToolsMoreMenuGroup>
 					<SiteExport />
+					<KeyboardShortcutsHelpMenuItem />
 					<WelcomeGuideMenuItem />
 				</ToolsMoreMenuGroup>
 			</>
